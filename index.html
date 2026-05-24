@@ -1,3 +1,10 @@
+ผมได้นำโค้ด GitHub `index.html` ของคุณมาปรับแต่งเพิ่ม โดยใส่ **"ปุ่มลอย (Floating Button)"** ไว้ที่มุมขวาล่างของหน้าจอ และเมื่อกดปุ่มนี้ ระบบจะแสดงหน้าต่างป๊อปอัป (Modal) แนะนำวิธีติดตั้งแอปพร้อมดึงรูป ICON จาก Google Drive ID ที่คุณระบุมาแสดงผลอย่างสวยงามครับ
+
+วิธีนี้ดีมากเพราะคุณสามารถจัดการทุกอย่างได้จากฝั่ง GitHub ทันที โดยไม่ต้องกลับไปแก้ไขโค้ดฝั่ง Google Apps Script เลยครับ
+
+คัดลอกโค้ดด้านล่างนี้ไปวางทับในไฟล์ `index.html` บน GitHub ได้เลยครับ:
+
+```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -25,13 +32,78 @@
         <div class="mt-4 text-2xl font-bold text-blue-600 tracking-wide" id="loading-text">กำลังโหลดข้อมูล 0%</div>
     </div>
 
-    <div class="flex-1 w-full relative">
+    <div class="flex-1 w-full relative z-0">
         <iframe 
             id="app-frame"
             src="https://script.google.com/macros/s/AKfycbzue_nBXE-k69fGtz56rkZNNxuMUdpeHVRZiuPowMDL_ZN_0rDfB1lM1w6riHPXUeLMHQ/exec" 
             class="absolute inset-0 w-full h-full border-none"
             onload="completeLoading()">
         </iframe>
+    </div>
+
+    <button onclick="openInstallModal()" class="fixed bottom-6 right-6 z-40 bg-slate-800 hover:bg-slate-900 text-white shadow-xl rounded-full px-5 py-3 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95 border border-slate-700">
+        <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <span class="text-lg font-bold tracking-wide">ติดตั้งแอป</span>
+    </button>
+
+    <div id="installModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 opacity-0 pointer-events-none transition-opacity duration-300 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300 relative max-h-[90vh] overflow-y-auto">
+            
+            <button onclick="closeInstallModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div class="flex flex-col items-center text-center mt-2">
+                <div class="w-20 h-20 bg-slate-100 rounded-2xl p-1 shadow-md mb-3 border border-slate-200 overflow-hidden">
+                    <img src="https://drive.google.com/thumbnail?id=1blFfY5TlCulzAjwvjgGJNGJppipP5gV2&sz=w256" alt="App Icon" class="w-full h-full object-cover rounded-xl">
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800">เพิ่มทางลัดลงหน้าจอมือถือ</h3>
+                <p class="text-base text-slate-500 mt-1">เข้าใช้งานระบบได้สะดวกรวดเร็วเหมือนแอปพลิเคชัน</p>
+            </div>
+
+            <div class="flex border-b border-slate-200 mt-5">
+                <button id="tabAndroid" onclick="switchTab('android')" class="flex-1 py-2 text-center text-lg font-bold border-b-2 border-blue-600 text-blue-600 transition-all">Android</button>
+                <button id="tabIOS" onclick="switchTab('ios')" class="flex-1 py-2 text-center text-lg font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all">iOS (iPhone)</button>
+            </div>
+
+            <div id="contentAndroid" class="mt-4 space-y-3 text-base text-slate-600">
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">1</span>
+                    <span>เปิดลิงก์ระบบบนเบราว์เซอร์ <strong>Google Chrome</strong></span>
+                </div>
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">2</span>
+                    <span>กดที่สัญลักษณ์ <strong class="text-slate-800">จุด 3 จุด (⋮)</strong> บริเวณมุมบนขวาสุด</span>
+                </div>
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">3</span>
+                    <span>เลือกเมนู <strong class="text-blue-600">"เพิ่มลงในหน้าจอหลัก"</strong> หรือ <strong class="text-blue-600">"ติดตั้งแอป"</strong></span>
+                </div>
+            </div>
+
+            <div id="contentIOS" class="mt-4 space-y-3 text-base text-slate-600 hidden">
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">1</span>
+                    <span>เปิดลิงก์ระบบบนเบราว์เซอร์ <strong>Safari</strong> เท่านั้น</span>
+                </div>
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">2</span>
+                    <span>กดปุ่ม <strong class="text-slate-800">แชร์ (Share)</strong> ไอคอนรูปกล่องสี่เหลี่ยมที่มีลูกศรชี้ขึ้นตรงแถบล่าง</span>
+                </div>
+                <div class="flex gap-3 items-start bg-slate-50 p-3 rounded-xl">
+                    <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-sm mt-0.5">3</span>
+                    <span>เลื่อนลงมาแล้วเลือกเมนู <strong class="text-blue-600">"เพิ่มไปยังหน้าจอโฮม"</strong></span>
+                </div>
+            </div>
+
+            <button onclick="closeInstallModal()" class="w-full mt-6 bg-slate-800 hover:bg-slate-900 text-white text-lg font-bold py-2.5 rounded-xl transition-colors active:scale-[0.98]">
+                รับทราบ
+            </button>
+        </div>
     </div>
 
     <script>
@@ -59,6 +131,47 @@
                     loader.style.display = 'none';
                 }, 500);
             }, 300);
+        }
+
+        // --- ชุดคำสั่งสำหรับควบคุม Modal ติดตั้งแอป ---
+
+        function openInstallModal() {
+            const modal = document.getElementById('installModal');
+            modal.classList.remove('hidden');
+            // หน่วงเวลาเล็กน้อยเพื่อให้ CSS Transition ทำงาน
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeInstallModal() {
+            const modal = document.getElementById('installModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('.transform').classList.add('scale-95');
+            // รอจนกว่า Animation ปิดจะเสร็จค่อยซ่อนแท็ก
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function switchTab(platform) {
+            const tabAndroid = document.getElementById('tabAndroid');
+            const tabIOS = document.getElementById('tabIOS');
+            const contentAndroid = document.getElementById('contentAndroid');
+            const contentIOS = document.getElementById('contentIOS');
+
+            if (platform === 'android') {
+                tabAndroid.className = "flex-1 py-2 text-center text-lg font-bold border-b-2 border-blue-600 text-blue-600 transition-all";
+                tabIOS.className = "flex-1 py-2 text-center text-lg font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all";
+                contentAndroid.classList.remove('hidden');
+                contentIOS.classList.add('hidden');
+            } else {
+                tabAndroid.className = "flex-1 py-2 text-center text-lg font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600 transition-all";
+                tabIOS.className = "flex-1 py-2 text-center text-lg font-bold border-b-2 border-blue-600 text-blue-600 transition-all";
+                contentAndroid.classList.add('hidden');
+                contentIOS.classList.remove('hidden');
+            }
         }
     </script>
 
