@@ -1,16 +1,71 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<base target="_top">
-<meta charset="UTF-8">
-<meta http-equiv="X-UA-Compatible"
-content="IE=edge">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0"> <title เว็บแอป </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'TH Sarabun New';
+            src: local('TH Sarabun New');
+        }
+        body {
+            font-family: 'TH Sarabun New', 'Sarabun', sans-serif;
+        }
+    </style>
 </head>
-<body>
-<iframe style="width: 100%; height:
-100vh;" scrolling="yes" src="https://script.google.com/macros/s/AKfycbw4KeoYX-uCaWthrvyXYO3k_99t5mY363Wb4IVktJ8E/dev"
-frameborder="0"></iframe>
+<body class="bg-slate-50 overflow-hidden h-screen w-full flex flex-col text-slate-800">
+
+    <div id="loader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-500">
+        <div class="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <div class="mt-4 text-2xl font-bold text-blue-600 tracking-wide" id="loading-text">กำลังโหลดข้อมูล 0%</div>
+    </div>
+
+    <nav class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm shrink-0">
+        <div class="flex items-center gap-3">
+            <img src="https://img5.pic.in.th/file/secure-sv1/logo.png" alt="Logo" class="h-8 object-contain" onerror="this.style.display='none'">
+            <span class="text-xl font-bold text-slate-700">ระบบการจัดการ</span>
+        </div>
+    </nav>
+
+    <div class="flex-1 w-full relative">
+        <iframe 
+            id="app-frame"
+            src="https://script.google.com/macros/s/AKfycby49rrG703fMxUaxXIpDUefghX-uZCDyu2y4T2evfPS4j3KH_VRMYOE1NgKFFxdEYXuwg/exec" 
+            class="absolute inset-0 w-full h-full border-none"
+            onload="completeLoading()">
+        </iframe>
+    </div>
+
+    <script>
+        let percent = 0;
+        const loadingText = document.getElementById('loading-text');
+        const loader = document.getElementById('loader');
+
+        // เอฟเฟกต์จำลองตัวเลข % วิ่งระหว่างรอโหลด iframe
+        const progress = setInterval(() => {
+            if (percent < 90) {
+                percent += Math.floor(Math.random() * 15) + 1;
+                if (percent > 90) percent = 90;
+                loadingText.innerText = `กำลังโหลดข้อมูล ${percent}%`;
+            }
+        }, 150);
+
+        // ฟังก์ชันเมื่อ iframe โหลดเสร็จสมบูรณ์
+        function completeLoading() {
+            clearInterval(progress);
+            loadingText.innerText = `กำลังโหลดข้อมูล 100%`;
+            
+            setTimeout(() => {
+                loader.classList.add('opacity-0');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                }, 500);
+            }, 300);
+        }
+    </script>
+
 </body>
 </html>
